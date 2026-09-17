@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>H9Dash 实现流程信息图</title>
+<style>
+  :root{
+    --bg:#ebede5;
+    --ink:#161c17;
+    --ink2:#5d655d;
+    --card:#f8f9f4;
+    --card-br:#dee3d6;
+    --mini:#ffffff;
+    --mini-br:#e4e7dd;
+    --green:#2f7c4e;
+    --green-deep:#1d5b38;
+    --tag-bg:#dcebdf;
+    --screen:#fbfbf8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:var(--bg);}
+  body{
+    width:750px;
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{padding:18px 18px 20px;}
+
+  /* ---------- 头卡 ---------- */
+  .hero{
+    position:relative;
+    border-radius:20px;
+    padding:30px 34px 28px;
+    background:
+      radial-gradient(640px 300px at 88% -20%, rgba(72,140,98,.34), rgba(72,140,98,0) 62%),
+      linear-gradient(155deg,#13231a 0%,#0b140f 70%);
+    color:#f2f6f1;
+    display:flex;
+    justify-content:space-between;
+    gap:24px;
+    overflow:hidden;
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:5px;
+    color:#8fb59b;
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:33px;
+    line-height:1.42;
+    font-weight:800;
+    letter-spacing:.5px;
+  }
+  .hero .sub{
+    margin-top:12px;
+    font-size:13px;
+    color:#a4bcab;
+    letter-spacing:1px;
+  }
+  .badges{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:9px;
+    padding-top:4px;
+    flex:none;
+  }
+  .badges span{
+    font-size:11px;
+    letter-spacing:1px;
+    color:#bfe4cb;
+    background:rgba(84,160,112,.16);
+    border:1px solid rgba(126,200,152,.38);
+    border-radius:999px;
+    padding:6px 13px;
+    white-space:nowrap;
+  }
+  .badges b{color:#e8f6ec;font-weight:700;}
+
+  /* ---------- 步骤卡通用 ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-br);
+    border-radius:18px;
+    margin-top:14px;
+    padding:18px 20px 20px;
+  }
+  .step-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .step-tag{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:2px;
+    color:var(--green);
+  }
+  .tag{
+    font-size:10px;
+    color:var(--green);
+    background:var(--tag-bg);
+    border-radius:6px;
+    padding:3px 8px;
+    letter-spacing:1px;
+  }
+
+  /* ---------- STEP 1 ---------- */
+  .sources{display:flex;gap:12px;}
+  .src{
+    flex:1;
+    background:var(--mini);
+    border:1px solid var(--mini-br);
+    border-radius:12px;
+    padding:13px 14px 12px;
+  }
+  .src .num{font-size:11px;color:#9aa196;margin-bottom:5px;}
+  .src .name{font-size:15px;font-weight:700;margin-bottom:7px;}
+  .src li{
+    list-style:none;
+    font-size:11px;
+    color:var(--ink2);
+    line-height:1.9;
+  }
+  .src li::before{content:"·";color:#9aa196;margin-right:5px;}
+  .step-bar{
+    margin-top:14px;
+    font-size:12px;
+    color:#57605a;
+    letter-spacing:.5px;
+  }
+  .step-bar .pill{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:700;
+    color:var(--green);
+    border:1px solid rgba(47,124,78,.45);
+    border-radius:6px;
+    padding:2px 7px;
+    margin-left:4px;
+    vertical-align:1px;
+  }
+
+  /* ---------- STEP 2 / 3 ---------- */
+  .duo{display:flex;margin-bottom:12px;}
+  .duo .step-tag{flex:1;}
+  .duo .spacer{width:58px;flex:none;}
+  .panels{display:flex;gap:0;align-items:stretch;}
+  .panel-card{
+    flex:1;
+    background:var(--mini);
+    border:1px solid var(--mini-br);
+    border-radius:14px;
+    padding:12px 13px 11px;
+    display:flex;
+    flex-direction:column;
+  }
+  .p-title{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:1px;
+    color:#6c7a6e;
+    margin-bottom:10px;
+  }
+  .device{
+    background:#181c19;
+    border-radius:16px;
+    padding:9px;
+    box-shadow:0 10px 24px rgba(20,30,22,.18);
+  }
+  .screen{
+    background:var(--screen);
+    border-radius:8px;
+    aspect-ratio:825/1200;
+    overflow:hidden;
+    padding:14px 15px 12px;
+    display:flex;
+    flex-direction:column;
+  }
+  .screen > *{flex:none;}
+  .p-cap{
+    margin-top:9px;
+    font-size:10px;
+    color:#8a9184;
+    letter-spacing:.5px;
+    text-align:center;
+  }
+
+  /* 切换箭头列 */
+  .switch{
+    width:58px;
+    flex:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+  }
+  .switch .t1{font-size:11px;font-weight:800;color:var(--green);letter-spacing:1px;}
+  .switch .t2{font-size:10px;color:#7b8476;}
+
+  /* 看板屏 */
+  .d-top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .d-date1{font-size:15px;font-weight:800;}
+  .d-date2{font-size:8.5px;color:#6f746d;margin-top:3px;letter-spacing:1px;}
+  .d-time{font-size:31px;font-weight:800;letter-spacing:.5px;line-height:1;}
+  .d-div{border-top:1.6px solid #191919;margin:9px 0 8px;}
+  .d-wlabel{font-size:8.5px;color:#6f746d;letter-spacing:1px;}
+  .d-wmain{display:flex;align-items:baseline;gap:8px;margin-top:4px;}
+  .d-wtemp{font-size:23px;font-weight:800;}
+  .d-wtext{font-size:11px;font-weight:700;}
+  .d-whl{font-size:8.5px;color:#6f746d;margin-top:3px;}
+  .d-sec{font-size:12px;font-weight:800;margin-bottom:5px;}
+  .d-item{font-size:8.5px;color:#242824;line-height:1.55;}
+  .d-item::before{content:"·";margin-right:4px;color:#555;}
+  .d-hot{font-size:8.5px;color:#242824;line-height:1.75;}
+  .d-item,.d-hot{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .d-hot b{font-weight:700;margin-right:5px;}
+
+  /* 歌词屏 */
+  .m-title{display:flex;align-items:center;gap:6px;}
+  .m-title svg{flex:none;}
+  .m-song{font-size:12.5px;font-weight:800;}
+  .m-artist{font-size:7.5px;color:#6f746d;margin-top:4px;letter-spacing:.3px;}
+  .m-div{border-top:1.4px solid #191919;margin:9px 0 7px;}
+  .lrow{position:relative;text-align:center;padding:1.5px 0;}
+  .lrow .en{font-size:9px;color:#8d928a;line-height:1.35;}
+  .lrow .zh{font-size:7px;color:#a9aea5;line-height:1.4;}
+  .lrow.cur .en{font-size:10px;font-weight:800;color:#141414;}
+  .lrow.cur .zh{color:#5b6059;}
+  .lrow.cur::before{
+    content:"";position:absolute;left:2px;top:3px;bottom:3px;width:3px;background:#141414;
+  }
+  .m-progress{margin-top:auto;padding-top:8px;}
+  .m-track{height:3.5px;background:#dcdcd6;border-radius:2px;overflow:hidden;}
+  .m-fill{height:100%;width:48%;background:#141414;}
+  .m-time{font-size:8.5px;font-weight:700;margin-top:5px;}
+  .m-btns{display:flex;gap:5px;margin-top:8px;}
+  .m-btn{
+    flex:1;height:26px;border:1.5px solid #191919;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .m-playlist{font-size:7.5px;color:#8d928a;margin-top:8px;}
+
+  /* 底部参数条 */
+  .stats{
+    display:flex;
+    margin-top:14px;
+    border-top:1px dashed #ccd2c4;
+    padding-top:13px;
+  }
+  .stat{flex:1;text-align:center;}
+  .stat .k{font-size:10px;color:#8a9184;letter-spacing:1px;margin-bottom:5px;}
+  .stat .v{font-size:13.5px;font-weight:800;color:#23301f;}
+
+  /* ---------- 横幅 ---------- */
+  .banner{
+    margin-top:14px;
+    border-radius:18px;
+    padding:24px 24px 22px;
+    text-align:center;
+    background:linear-gradient(150deg,#237046 0%,#174f30 78%);
+    color:#fff;
+  }
+  .banner .big{font-size:20px;font-weight:800;letter-spacing:1.5px;}
+  .banner .small{
+    margin-top:9px;
+    font-size:11px;
+    color:rgba(255,255,255,.78);
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+<!--
+  H9Dash project infographic.
+  Render this page at 750px width and capture a full-page PNG for docs/h9dash-flow.png.
+-->
+<div class="page">
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">墨水屏 变废为宝 · 实现流程</div>
+      <h1>闲置六年的安卓墨水屏<br>怎么变成信息看板 + 歌词屏</h1>
+      <p class="sub">三步改造，每一步都有产物</p>
+    </div>
+    <div class="badges">
+      <span>方案 · <b>APK 直装</b></span>
+      <span>改动 · <b>不 root 不刷机</b></span>
+      <span>续航 · <b>常显数周</b></span>
+    </div>
+  </header>
+
+  <section class="card">
+    <div class="step-head">
+      <span class="step-tag">STEP 1 · 内容从哪来</span>
+      <span class="tag">信息源</span>
+    </div>
+    <div class="sources">
+      <div class="src">
+        <div class="num">1</div>
+        <div class="name">联网数据源</div>
+        <ul>
+          <li>天气 / 全球新闻 / 中文热搜</li>
+          <li>免密钥 · 后台自动抓</li>
+        </ul>
+      </div>
+      <div class="src">
+        <div class="num">2</div>
+        <div class="name">系统时钟</div>
+        <ul>
+          <li>日期与时间</li>
+          <li>分钟对齐，一分钟只刷一次</li>
+        </ul>
+      </div>
+      <div class="src">
+        <div class="num">3</div>
+        <div class="name">网易云客户端</div>
+        <ul>
+          <li>在放哪首歌 · 进度</li>
+          <li>逐行歌词 + 翻译</li>
+        </ul>
+      </div>
+    </div>
+    <div class="step-bar">电脑端渲染 —— 定时聚合以上信息，渲染成一张<span class="pill">产物① · 16 阶灰 PNG</span></div>
+  </section>
+
+  <section class="card">
+    <div class="step-head duo">
+      <span class="step-tag">STEP 2 · 墨水屏拉图</span>
+      <span class="spacer"></span>
+      <span class="step-tag">STEP 3 · 一键切面板</span>
+    </div>
+    <div class="panels">
+      <div class="panel-card">
+        <div class="p-title">产物② · 信息看板</div>
+        <div class="device">
+          <div class="screen">
+            <div class="d-top">
+              <div>
+                <div class="d-date1">9月17日</div>
+                <div class="d-date2">2026年 周四</div>
+              </div>
+              <div class="d-time">13:06</div>
+            </div>
+            <div class="d-div"></div>
+            <div class="d-wlabel">天气 · 广州</div>
+            <div class="d-wmain">
+              <span class="d-wtemp">31°</span>
+              <span class="d-wtext">大部晴朗</span>
+            </div>
+            <div class="d-whl">最高 32° 最低 25°</div>
+            <div class="d-div"></div>
+            <div class="d-sec">全球新闻</div>
+            <div class="d-item">EU offers Canada 'associate member' role</div>
+            <div class="d-item">Russia seizes Ukrainian POWs, then demands favors</div>
+            <div class="d-item">Fed expected to raise interest rates</div>
+            <div class="d-div"></div>
+            <div class="d-sec">中文网络热搜</div>
+            <div class="d-hot"><b>1.</b>机顶盒将成为历史</div>
+            <div class="d-hot"><b>2.</b>高市内阁全体请辞</div>
+            <div class="d-hot"><b>3.</b>快递救人索赔案宣判</div>
+            <div class="d-hot"><b>4.</b>中国运动员机场等待6小时</div>
+          </div>
+        </div>
+        <div class="p-cap">dash.png · 825×1200 · 内容变了才刷</div>
+      </div>
+
+      <div class="switch">
+        <svg width="34" height="30" viewBox="0 0 34 30" fill="none">
+          <line x1="3" y1="9" x2="26" y2="9" stroke="#2f7c4e" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="31,9 21,3.5 21,14.5" fill="#2f7c4e"/>
+          <line x1="31" y1="21" x2="8" y2="21" stroke="#2f7c4e" stroke-width="3" stroke-linecap="round"/>
+          <polygon points="3,21 13,15.5 13,26.5" fill="#2f7c4e"/>
+        </svg>
+        <div class="t1">一键切换</div>
+        <div class="t2">≤4 秒同步</div>
+      </div>
+
+      <div class="panel-card">
+        <div class="p-title">产物③ · 歌词面板</div>
+        <div class="device">
+          <div class="screen">
+            <div class="m-title">
+              <svg width="9" height="10" viewBox="0 0 9 10"><polygon points="0,0 9,5 0,10" fill="#141414"/></svg>
+              <span class="m-song">Dream in Mortal Dust</span>
+            </div>
+            <div class="m-artist">道安澜 · Sword and Fairy English Interlude</div>
+            <div class="m-div"></div>
+            <div class="lrow">
+              <div class="en">Moonlight wipes the sword, flowers f…</div>
+              <div class="zh">月光拭剑，花自由绽</div>
+            </div>
+            <div class="lrow">
+              <div class="en">Spirit dreams no return, endless sea</div>
+              <div class="zh">灵梦不归，无尽沧海</div>
+            </div>
+            <div class="lrow cur">
+              <div class="en">Wine a thousand jars, lips swirl ease</div>
+              <div class="zh">千坛酒，唇旋舒怀</div>
+            </div>
+            <div class="lrow">
+              <div class="en">Tipsy in tree shade, half-drunk breeze</div>
+              <div class="zh">醉卧树荫，半酣风来</div>
+            </div>
+            <div class="lrow">
+              <div class="en">River boat drifts, days short flee</div>
+              <div class="zh">江舟漂，时日短催</div>
+            </div>
+            <div class="lrow">
+              <div class="en">Heart in chaos suddenly</div>
+              <div class="zh">心绪骤然乱飞</div>
+            </div>
+            <div class="m-progress">
+              <div class="m-track"><div class="m-fill"></div></div>
+              <div class="m-time">2:34 / 5:01</div>
+            </div>
+            <div class="m-btns">
+              <div class="m-btn">
+                <svg width="12" height="10" viewBox="0 0 12 10"><rect x="0" y="0" width="2.4" height="10" fill="#141414"/><polygon points="12,0 12,10 3.6,5" fill="#141414"/></svg>
+              </div>
+              <div class="m-btn">
+                <svg width="9" height="10" viewBox="0 0 9 10"><rect x="0" y="0" width="3.2" height="10" fill="#141414"/><rect x="5.8" y="0" width="3.2" height="10" fill="#141414"/></svg>
+              </div>
+              <div class="m-btn">
+                <svg width="12" height="10" viewBox="0 0 12 10"><polygon points="0,0 0,10 8.4,5" fill="#141414"/><rect x="9.6" y="0" width="2.4" height="10" fill="#141414"/></svg>
+              </div>
+              <div class="m-btn">
+                <svg width="12" height="10" viewBox="0 0 12 10"><polygon points="0,3.5 3.5,3.5 7.5,0 7.5,10 3.5,6.5 0,6.5" fill="#141414"/><rect x="9" y="4" width="3.4" height="2" fill="#141414"/></svg>
+              </div>
+              <div class="m-btn">
+                <svg width="12" height="10" viewBox="0 0 12 10"><polygon points="0,3.5 3.5,3.5 7.5,0 7.5,10 3.5,6.5 0,6.5" fill="#141414"/><rect x="9" y="1.2" width="3.4" height="2" fill="#141414"/><rect x="9" y="4" width="3.4" height="2" fill="#141414"/><rect x="9.7" y="2.5" width="2" height="6" fill="#141414"/><rect x="9" y="6.8" width="3.4" height="2" fill="#141414" opacity="0"/></svg>
+              </div>
+            </div>
+            <div class="m-playlist">歌单：道安澜喜欢的音乐</div>
+          </div>
+        </div>
+        <div class="p-cap">逐行歌词 + 媒体键遥控 · 只传脏块</div>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><div class="k">轮询间隔</div><div class="v">4 秒</div></div>
+      <div class="stat"><div class="k">传输方式</div><div class="v">局域网 HTTP</div></div>
+      <div class="stat"><div class="k">找电脑</div><div class="v">自动扫网段</div></div>
+      <div class="stat"><div class="k">屏幕规格</div><div class="v">825×1200</div></div>
+    </div>
+  </section>
+
+  <footer class="banner">
+    <div class="big">这台墨水屏上显示的东西，全世界独一份</div>
+    <div class="small">信息看板 + 逐行歌词 —— 旧物不是垃圾，只是还没找到新用途</div>
+  </footer>
+
+</div>
+</body>
+</html>

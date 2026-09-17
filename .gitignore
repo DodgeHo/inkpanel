@@ -1,0 +1,79 @@
+# 设备备份与个人数据 —— 绝对不要提交
+artifacts/
+**/h9dash_screen.txt
+**/h9dash_keys.log
+**/h9dash_onyx.txt
+**/h9dash_auto.txt
+**/h9dash_bad.txt
+**/h9dash.stop
+**/dashboard.conf
+# 设备盘根目录那份带 IP/token；示例文件是给人看的，要提交
+!dashboard.conf.example
+
+# 渲染产物
+dashboard/out/
+music/out/
+*.png
+!docs/**/*.png
+
+# 运行期缓存与日志
+music/cache/
+dashboard/cache/
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# PyInstaller 打包产物（packaging/ 里的图标与版本信息是源文件，要提交）
+build/
+dist/
+release/
+*.spec
+!packaging/*.png
+
+# Android 构建产物
+android/build/
+# 编译好的 APK 不进仓库 —— 它由 android/build.py 生成，改代码后必须重编译，
+# 提交二进制文件会让 diff 变成"不可读的一行"，还容易忘同步。
+# 对外分发走 GitHub Release 附件（见 README 的「编译 APK」一节）。
+android/H9Dash.apk
+/H9Dash.apk
+*.dex
+*.ap_
+.gradle/
+.idea/
+local.properties
+
+# 签名密钥
+#
+# —— 发布用的密钥**绝不提交**。
+#
+# —— 但 android/debug.keystore 是**故意**放进仓库的，别删：
+#    它是调试密钥，口令就是公开的 android/android（keytool 默认值），本身没有
+#    "保密"可言。提交它换来的是**所有人编出来的 APK 签名一致** —— 于是升级
+#    直接覆盖安装就行。
+#    反过来（不提交）会很难受：每个人、每台机器首次编译都会各生成一把新密钥，
+#    设备上每次换人/换电脑编都得先卸载再装，而且互相盖不上。
+#    代价要说清楚：知道这把密钥的人可以签一个能"覆盖升级"已装 H9Dash 的 APK。
+#    这个 App 申请的权限只有联网 + 读写外部存储 + 开机自启，接受这个风险。
+*.keystore
+*.jks
+!android/debug.keystore
+
+# 一次性探针 / 调试产物（下划线开头）
+# 注意：下面的 !__init__.py 必须留 —— 否则这条规则会把包里的 __init__.py 也吃掉，
+# 提交到 GitHub 后包就变成隐式命名空间包了。
+_*
+!**/__init__.py
+
+# 编辑器 / 系统
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.tmp

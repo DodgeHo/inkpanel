@@ -1,0 +1,44 @@
+# H9Dash 设备端配置示例
+#
+# ⚠️ 这不是设备实际读的那个文件。
+#    真正的文件叫 dashboard.conf，位于设备盘（USB 大容量存储）根目录，
+#    由 deploy.py / GUI 的「部署 APK + 配置」自动生成 —— 里面带着**你本机的
+#    IP、端口和随机 token**，所以它被 .gitignore 排除，不会进仓库。
+#
+# 这个示例只是把"有哪些选项"摆出来，方便你手工改设备上那份。
+# 改完在设备上重开一次 App 即可生效。
+
+
+# ---- 网络 ----
+# 这三项由 App 自动维护：自动发现到 PC 后会自己改写，所以填错了也能自愈。
+# 想固定地址就在路由器上给电脑做 MAC 绑定，然后把 host 填死。
+host         = 192.168.1.100
+port         = 8765
+token        = 从 ~/.h9dash/token 拷过来（服务端启动时也会打印）
+
+# ---- 面板 ----
+# ⚠️ 看哪个面板是**电脑**决定的，不是这里决定的。
+#   设备每 4 秒问一次服务端的 GET /panel，所以电脑上一点切换，平板几秒内就跟着走；
+#   平板上长按菜单切换，改的同样是服务端状态 —— 两边永远一致。
+#   下面这个 mode 只在**连不上服务端**时兜底：开机先画哪一版。
+#     mode = dash   信息看板
+#     mode = music  网易云歌词面板
+mode         = dash
+
+# ---- 刷新节奏 ----
+# interval_min 已废弃（设备统一 4 秒轮询 /panel），留着是为了兼容老配置。
+# 看板要不要重画由服务端的 rev 变更检测决定 —— 内容没变就不刷屏。
+interval_min = 30
+flash        = 0      # 看板每次重绘前是否黑白闪屏（dash 建议 1）
+flash_min    = 20     # 每隔几分钟整屏刷一次去残影（music 面板靠它）
+
+# ---- 显示 ----
+rotate       = 0          # 图片旋转 0/90/180/270（music 模式请保持 0）
+orientation  = portrait   # portrait / landscape / auto
+status       = 1          # 底部状态行（显示上次更新时间）
+scale        = fit        # fit / crop / stretch
+
+# ---- 按键 ----
+keylog       = 1    # 未知按键写日志 + 上报，用来摸真实键码
+key_prev     = 92   # KEYCODE_PAGE_UP   → 上一首
+key_next     = 93   # KEYCODE_PAGE_DOWN → 下一首

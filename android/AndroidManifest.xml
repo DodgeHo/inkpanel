@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.wu.h9dash"
+    android:versionCode="1"
+    android:versionName="1.0">
+
+    <uses-sdk
+        android:minSdkVersion="15"
+        android:targetSdkVersion="15" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- hardwareAccelerated=false：
+         1) i.MX6SL 的 GPU 很弱，软件绘制的墨水屏反而更可控；
+         2) 局刷是"原地改写 fullBmp 再 invalidate"，硬件加速下位图纹理
+            可能不及时重传，会看到残影。
+         largeHeap=true：
+         一张 825x1200 的 ARGB_8888 底图就要 3.78 MB，而 targetSdk=15 时
+         默认堆只有 16~24 MB；每轮脏块还要临时解出几张 tile 位图。
+         实测出现过"解析失败 + 随即闪退"，就是堆被打满。
+         这个 App 从头到尾只有一张底图，开 largeHeap 是合适的。 -->
+    <application
+        android:label="H9Dash"
+        android:allowBackup="false"
+        android:largeHeap="true"
+        android:hardwareAccelerated="false"
+        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+
+        <activity
+            android:name=".MainActivity"
+            android:label="H9Dash"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|keyboardHidden|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>
