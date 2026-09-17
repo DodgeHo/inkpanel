@@ -36,9 +36,9 @@
 
 ![H9Dash 实现流程](docs/h9dash-flow.png)
 
-![信息看板](docs/dash.png)
+<img src="docs/dash.png" alt="信息看板" width="360">
 
-![网易云歌词面板](docs/music-preview.png)
+<img src="docs/music-preview.png" alt="网易云歌词面板" width="360">
 
 ![真实效果](docs/RealPhoto.jpg)
 
@@ -65,7 +65,7 @@ Kindle 那种 15 秒重绘方案的 0.5~1 天。
 | 文件 | 说明 |
 |---|---|
 | `H9Dash 控制台.exe` | PC 端控制台 + 服务（免 Python，双击即用） |
-| `H9Dash 客户端.apk` | 设备端 App |
+| `H9Dash.apk` | 设备端 App |
 
 双击 exe 就能用，界面和源码版是同一个。只有几处不同：
 
